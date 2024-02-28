@@ -1,1 +1,1 @@
-# AnonymousAchilles.github.io
+# Text-Guided Texture Generation for 3D Objects with Progressive Sampling
