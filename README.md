@@ -1,1 +1,1 @@
-# Text-Guided Texture Generation for 3D Objects with Progressive Sampling
+# TexGen: Text-Guided 3D Texture Generation with Multi-view Sampling and Resampling
