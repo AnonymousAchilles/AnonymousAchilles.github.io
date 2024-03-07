@@ -1,0 +1,1226 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="description" content="TexGen: Text-Guided 3D Texture Generation with Multi-view Sampling and Resampling">
+    <meta name="keywords" content="diffusion, 3D textures, 3D contents, generation">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>TexGen: Text-Guided 3D Texture Generation with Multi-view Sampling and Resampling</title>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
+
+    <link rel="stylesheet" href="./static/css/bulma.min.css">
+    <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+    <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+    <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+    <link rel="stylesheet" href="./static/css/index.css">
+
+    <style>
+		.render_wrapper {
+			position: relative;
+            height: 300px;
+         }
+        .render_wrapper_small {
+			position: relative;
+            height: 200px;
+         }
+		.render_div {
+			position: absolute;
+			top: 0;
+			left: 0;
+		}
+
+        #interpolation-image-wrapper-car{
+            text-align: center;
+        }
+        #interpolation-image-wrapper-chair{
+            text-align: center;
+        }
+        .nested-columns {
+            margin-bottom: 0 !important;
+        }
+    </style>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script defer src="./static/js/fontawesome.all.min.js"></script>
+    <script src="./static/js/bulma-carousel.min.js"></script>
+    <script src="./static/js/bulma-slider.min.js"></script>
+    <script src="./static/js/index.js"></script>
+
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+
+    <section class="hero">
+        <div class="hero-body">
+            <div class="container is-max-desktop">
+                <div class="columns is-centered">
+                    <div class="column has-text-centered">
+                        <h1 class="title is-2 publication-title">TexGen: Text-Guided 3D Texture Generation with Multi-view Sampling and Resampling</h1>
+                        <div class="is-size-5 publication-authors">
+                            <span class="author-block">
+                                <a >Anonymous Authors</a><sup></span>
+                        </div>
+                        <div class="is-size-5 publication-authors">
+                            <span class="author-block"><b>ECCV 2024 Under Review</b></span>
+                        </div>
+                        <div class="column has-text-centered">
+                            <div class="publication-links">
+                                <!-- PDF Link. -->
+                                <!-- <span class="link-block">
+                                    <a href="static/controlnet_texture.pdf"
+                                        class="external-link button is-normal is-rounded is-dark">
+                                        <span class="icon">
+                                            <i class="fas fa-file-pdf"></i>
+                                        </span>
+                                        <span>Paper</span>
+                                    </a>
+                                </span>
+                                <span class="link-block">
+                                    <a href="static/supp.pdf"
+                                        class="external-link button is-normal is-rounded is-dark">
+                                        <span class="icon">
+                                            <i class="fas fa-file-pdf"></i>
+                                        </span>
+                                        <span>Supplementary</span>
+                                    </a>
+                                </span> -->
+                                <!-- <span class="link-block">
+                                    <a class="external-link button is-normal is-rounded is-dark" href="static/Decorate3D.pdf">
+                                        <span class="icon">
+                                            <i class="ai ai-arxiv"></i>
+                                        </span>
+                                        <span>Arxiv</span>
+                                    </a>
+                                </span> -->
+                                <!-- Video Link. -->
+                                <!-- <span class="link-block">
+                                    <a href="https://youtu.be/x-X5z0Xgj-c"
+                                        class="external-link button is-normal is-rounded is-dark">
+                                        <span class="icon">
+                                            <svg class="svg-inline--fa fa-youtube fa-w-18" aria-hidden="true"
+                                                focusable="false" data-prefix="fab" data-icon="youtube" role="img"
+                                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"
+                                                data-fa-i2svg="">
+                                                <path fill="currentColor"
+                                                    d="M549.655 124.083c-6.281-23.65-24.787-42.276-48.284-48.597C458.781 64 288 64 288 64S117.22 64 74.629 75.486c-23.497 6.322-42.003 24.947-48.284 48.597-11.412 42.867-11.412 132.305-11.412 132.305s0 89.438 11.412 132.305c6.281 23.65 24.787 41.5 48.284 47.821C117.22 448 288 448 288 448s170.78 0 213.371-11.486c23.497-6.321 42.003-24.171 48.284-47.821 11.412-42.867 11.412-132.305 11.412-132.305s0-89.438-11.412-132.305zm-317.51 213.508V175.185l142.739 81.205-142.739 81.201z">
+                                                </path>
+                                            </svg> <i class="fab fa-youtube"></i> Font Awesome fontawesome.com -->
+                                        <!-- </span>
+                                        <span>Video</span>
+                                    </a>
+                                </span> --> 
+
+
+                                 <!-- Github Link. -->
+                                <!-- <span class="link-block">
+                                    <a href="https://github.com/Decorate3D/Decorate3D" class="external-link button is-normal is-rounded is-dark">
+                                        <span class="icon">
+                                            <i class="fab fa-github"></i>
+                                        </span>
+                                        <span>Code</span>
+                                    </a>
+                                </span> -->
+                                <!-- Dataset Link. -->
+                                <!-- <span class="link-block"></span> -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="hero teaser">
+        <div class="container is-max-desktop">
+            <div class="hero-body">
+                <img src="./static/teaser/title.jpg" width="200%" />
+                <h2 class=" subtitle has-text-centered" style="padding-top: 10px">
+                  Given a 3D mesh, we aim to synthesize 3D textures that correspond to arbitrary textual descriptions. Current methods for generating and assembling textures from sampled views often result in prominent seams or excessive smoothing. To tackle these issues, we present TexGen, a novel multi-view sampling and resampling framework for texture generation leveraging a pre-trained text-to-image diffusion model. For view consistent sampling, first of all we maintain a texture map in RGB space that is parameterized by the denoising step and updated after each sampling step of the diffusion model to progressively reduce the view discrepancy. An attention-guided multi-view sampling strategy is exploited to broadcast the appearance information across views. To preserve texture details, we develop a noise resampling technique that aids in the estimation of noise, generating inputs for subsequent denoising steps, as directed by the text prompt and current texture map.
+                  Through an extensive amount of qualitative and quantitative evaluations, we demonstrate that our proposed method produces significantly better texture quality for diverse 3D objects with a high degree of view consistency and rich appearance details, outperforming current state-of-the-art methods. 
+                  Furthermore, our proposed texture generation technique can also be applied to texture editing while preserving the original identity.
+                </h2>
+            </div>
+        </div>
+    </section>
+    <!-- <section class="section">
+        <div class="container is-max-desktop">
+            <div class="columns is-centered" style="margin-top: 15px">
+                <div class="column is-full-width">
+                    <h2 class="title is-4">Method Overview</h2>
+                    <img src="./static/teaser/overview.png"/>
+                    <div class="content has-text-justified" style="padding-top: 15px">
+                      <p> Overview of our proposed method, where <b>AGVS</b> and <b>T\(\mathbf{^2}\)GR</b> denote Attention-Guided View Sampling and Text&Texture-Guided Resampling, respectively. First of all, we sample \(N\) viewpoints across the objects. As shown in (a), our texture sampling strategy is an interleaved process of texture generation and diffusion denoising. Specifically, our texture sampling process is structured into \(T\) desnoising steps of diffusion process, and a complete RGB texture map (\(\hat{U}_{t}^N\)) is generated at the end of each step. As shown in (b), at denoising step \(t\), each AGVS module receives noisy latent features \(x_{t}^i\) as input to sample an image and produce a <b>partial texture map</b> \(\hat{U}_{t}^i\), along with noise estimation \(\epsilon_\theta(x_t^i)\). The generated \(\hat{U}_{t}^i\) serves as guidance for sampling the subsequent view. Subsequently, a <b>complete texture map</b> \(\hat{U}_{t}^N\) is employed to refine the noise estimation of each view within T\(^2\)GR modules, facilitating the prediction of noisy features for the ensuing denoising step (\(x_{t-1}^{1...N}\)).</p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+      <div class="container is-max-desktop">
+          <div class="columns is-centered" style="margin-top: 15px">
+              <div class="column is-full-width">
+                  <h2 class="title is-4">Method Details</h2>
+                  <center><img src="./static/teaser/details.png" width=68%/></center>
+                  <div class="content has-text-justified" style="padding-top: 15px">
+                    <p> Details of denoising for view \(i+1\) at step \(t\). The AGVS module is designed to generate denoised observation \(\hat{x}_0^{i+1}(x_t^{i+1})\) which will be assembled onto UV space to form intermediate texture \(\hat{U}_{t}^{i+1}\). The attention guidance is omitted in the figure for simplification. After iterating over all sampled views starting from \(i=1\) to \(N\), we obtain a complete texture map \(\hat{U}_{t}^N\) for each denoising step. Conditioned on the current aggragated texture map, the T\(^2\)GR module will update the noise estimation \(\epsilon_\theta(x_t^i)\) with the multi-conditioned classifier-free guidance (CFG) to calculate the noisy latent feature \(x_{t-1}^{i+1}\) of the next denoising step.</p>
+                  </div>
+
+              </div>
+          </div>
+      </div>
+  </section> -->
+
+    <section class="section hero">
+        <div class="container is-max-desktop">
+          <h2 class="title is-4">Comparison with TEXTure, Text2Tex, Fantasia3D, and ProlificDreamer</h2>
+
+         <div style="text-align: center; margin-bottom: 30px;">
+            <p style="font-style: italic; font-weight: bold;">“A Golden Lion”</p>
+         </div>
+            <div class="columns is-vcentered">
+               
+                <div class="column"  style="text-align:center">
+                  <div class="content" >
+                    <video id="dollyzoom" autoplay controls muted loop playsinline height="100%">
+                      <source src="./samples/videos/lion1.mp4"
+                              type="video/mp4">
+                    </video>
+                    <h4 class="subtitle has-text-centered">
+                    TEXTure <br> 
+                      </h4>
+                  </div>
+                </div>
+    
+                <div class="column"  style="text-align:center">
+                    <div class="content" >
+                      <video id="dollyzoom" autoplay controls muted loop playsinline height="100%">
+                        <source src="./samples/videos/lion2.mp4"
+                                type="video/mp4">
+                      </video>
+                      <h4 class="subtitle has-text-centered">
+                        Text2Tex <br> 
+                        </h4>
+                    </div>
+                  </div>
+
+                  <div class="column"  style="text-align:center">
+                    <div class="content" >
+                      <video id="dollyzoom" autoplay controls muted loop playsinline height="100%">
+                        <source src="./samples/videos/lion3.mp4"
+                                type="video/mp4">
+                      </video>
+                      <h4 class="subtitle has-text-centered">
+                        Ours <br> 
+                        </h4>
+                    </div>
+                  </div>
+            </div>
+
+            <div style="text-align: center; margin-bottom: 30px;">
+              <p style="font-style: italic; font-weight: bold;">“A Medieval Clock”</p>
+           </div>
+            <div class="columns is-vcentered">
+                <div class="column"  style="text-align:center">
+                    <div class="content" >
+                      <video id="dollyzoom" autoplay controls muted loop playsinline height="100%">
+                        <source src="./samples/videos/clock1.mp4"
+                                type="video/mp4">
+                      </video>
+                      <h4 class="subtitle has-text-centered">
+                        TEXTure <br> 
+                        </h4>
+                    </div>
+                  </div>
+      
+                  <div class="column"  style="text-align:center">
+                      <div class="content" >
+                        <video id="dollyzoom" autoplay controls muted loop playsinline height="100%">
+                          <source src="./samples/videos/clock2.mp4"
+                                  type="video/mp4">
+                        </video>
+                        <h4 class="subtitle has-text-centered">
+                        Text2Tex <br> 
+                          </h4>
+                      </div>
+                    </div>
+
+                    <div class="column"  style="text-align:center">
+                      <div class="content" >
+                        <video id="dollyzoom" autoplay controls muted loop playsinline height="100%">
+                          <source src="./samples/videos/clock3.mp4"
+                                  type="video/mp4">
+                        </video>
+                        <h4 class="subtitle has-text-centered">
+                        Ours <br> 
+                          </h4>
+                      </div>
+                    </div>
+            </div>
+            
+            <div style="text-align: center; margin-bottom: 30px;">
+              <p style="font-style: italic; font-weight: bold;">“A Backpack in Ironman Style” </p>
+           </div>
+            <div class="columns is-vcentered">
+
+                
+                  <div class="column"  style="text-align:center">
+                    <div class="content" >
+                      <video id="dollyzoom" autoplay controls muted loop playsinline height="100%">
+                        <source src="./samples/videos/back1.mp4"
+                                type="video/mp4">
+                      </video>
+                      <h4 class="subtitle has-text-centered">
+                      Fantasia3D <br> 
+                        </h4>
+                    </div>
+                 </div>
+      
+                  <div class="column"  style="text-align:center">
+                      <div class="content" >
+                        <video id="dollyzoom" autoplay controls muted loop playsinline height="100%">
+                          <source src="./samples/videos/back2.mp4"
+                                  type="video/mp4">
+                        </video>
+                        <h4 class="subtitle has-text-centered">
+                        ProlificDreamer <br> 
+                          </h4>
+                      </div>
+                    </div>
+
+                    <div class="column"  style="text-align:center">
+                      <div class="content" >
+                        <video id="dollyzoom" autoplay controls muted loop playsinline height="100%">
+                          <source src="./samples/videos/back3.mp4"
+                                  type="video/mp4">
+                        </video>
+                        <h4 class="subtitle has-text-centered">
+                        Ours <br> 
+                          </h4>
+                      </div>
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin-bottom: 30px;">
+                  <p style="font-style: italic; font-weight: bold;">“A NextGen Nascar in Red” </p>
+               </div>
+
+                <div class="columns is-vcentered">
+
+                    <div class="column"  style="text-align:center">
+                      <div class="content" >
+                        <video id="dollyzoom" autoplay controls muted loop playsinline height="100%">
+                          <source src="./samples/videos/car1.mp4"
+                                  type="video/mp4">
+                        </video>
+                        <h4 class="subtitle has-text-centered">
+                        Fantasia3D <br> 
+                          </h4>
+                      </div>
+                   </div>
+        
+                    <div class="column"  style="text-align:center">
+                        <div class="content" >
+                          <video id="dollyzoom" autoplay controls muted loop playsinline height="100%">
+                            <source src="./samples/videos/car2.mp4"
+                                    type="video/mp4">
+                          </video>
+                          <h4 class="subtitle has-text-centered">
+                          ProlificDreamer <br> 
+                            </h4>
+                        </div>
+                      </div>
+  
+                      <div class="column"  style="text-align:center">
+                        <div class="content" >
+                          <video id="dollyzoom" autoplay controls muted loop playsinline height="100%">
+                            <source src="./samples/videos/car3.mp4"
+                                    type="video/mp4">
+                          </video>
+                          <h4 class="subtitle has-text-centered">
+                          Ours <br> 
+                            </h4>
+                        </div>
+                      </div>
+                  </div>
+
+                <!-- <div class="column" >
+                    <div class="content">
+                    <video id="dollyzoom" autoplay controls muted loop playsinline height="100%">
+                        <source src="./samples/videos/fantastic3d_magic3d_comparison/ours_An_acient_chinese-style_house_srx4.mp4"
+                                type="video/mp4">
+                    </video>
+                    <h4 class="subtitle has-text-centered">
+                    Ours <br> (Prompt: An ancient Chinese-style house)
+                    </h4>
+                    </div>
+                </div>
+            </div>
+            <div class="column"  style="text-align:center">
+                <div class="content" >
+                <video id="dollyzoom" autoplay controls muted loop playsinline height="100%">
+                    <source src="./samples/videos/fantastic3d_magic3d_comparison/magic3D-chinese.mp4"
+                            type="video/mp4">
+                </video>
+                <h4 class="subtitle has-text-centered">
+                Magic3D <br> (Prompt: An ancient Chinese-style house)
+                </h4>
+                </div>
+                </div> -->
+            <!-- <div class="columns is-vcentered">
+      
+                <div class="column">
+                  <div class="content">
+                    <video id="dollyzoom" autoplay controls muted loop playsinline height="100%">
+                      <source src="./samples/videos/fantastic3d_magic3d_comparison/Fantasia3D-Fairy-garden1.mp4"
+                              type="video/mp4">
+                    </video>
+                    <h4 class="subtitle has-text-centered">
+                    Fantastic3D <br> (Prompt: Fairy house with a garden)
+                      </h4>
+                  </div>
+                </div>
+                <div class="column">
+                    <div class="content">
+                    <video id="dollyzoom" autoplay controls muted loop playsinline height="100%">
+                        <source src="./samples/videos/fantastic3d_magic3d_comparison/Magic3D-Fairy.mp4"
+                                type="video/mp4">
+                    </video>
+                    <h4 class="subtitle has-text-centered">
+                    Magic3D <br> (Prompt: Fairy house with a garden)
+                    </h4>
+                    </div>
+                    </div>
+                    <div class="column">
+                        <div class="content" justify-content:center; align-items:center;>
+                        <video id="dollyzoom" autoplay controls muted loop playsinline height="100%">
+                            <source src="./samples/videos/fantastic3d_magic3d_comparison/ours_Fairy_house_with_a_garden_srx4.mp4"
+                                    type="video/mp4">
+                        </video>
+                        <h4 class="subtitle has-text-centered">
+                        Ours <br> (Prompt: Fairy house with a garden)
+                        </h4>
+                        </div>
+                        </div>
+                </div> -->
+
+    </section>
+
+    <section class="section hero">
+        <div class="container is-max-desktop">
+          <h2 class="title is-4">Video Gallery</h2>
+          <div class="columns is-centered">
+      
+            <div class="column">
+              <div class="content">
+                <video id="dollyzoom" autoplay controls muted loop playsinline height="100%">
+                  <source src="./samples/videos/oil_apple.mp4"
+                          type="video/mp4">
+                </video>
+                <h4 class="subtitle has-text-centered">
+                  An oil painted apple
+                  </h4>
+              </div>
+            </div>
+
+            <div class="column">
+              <div class="content">
+                <video id="dollyzoom" autoplay controls muted loop playsinline height="100%">
+                  <source src="./samples/videos/silver.mp4"
+                          type="video/mp4">
+                </video>
+                <h4 class="subtitle has-text-centered">
+                A medieval armor
+                  </h4>
+              </div>
+            </div>
+
+            <div class="column">
+              <div class="content">
+                <video id="dollyzoom" autoplay controls muted loop playsinline height="100%">
+                  <source src="./samples/videos/fireplace.mp4"
+                          type="video/mp4">
+                </video>
+              <h4 class="subtitle has-text-centered">
+                A brick fireplace
+              </h4>
+              </div>
+            </div>
+
+          </div>
+          
+         
+            
+            <div class="columns is-centered">
+              <div class="column">
+                <div class="content">
+                  <video id="dollyzoom" autoplay controls muted loop playsinline height="100%">
+                    <source src="./samples/videos/wooden_ref.mp4"
+                            type="video/mp4">
+                  </video>
+                  <h4 class="subtitle has-text-centered">
+                    A wooden refrigerator
+                    </h4>
+                </div>
+              </div>   
+
+              <div class="column">
+                <div class="content">
+                  <video id="dollyzoom" autoplay controls muted loop playsinline height="100%">
+                    <source src="./samples/videos/coca_cola.mp4"
+                            type="video/mp4">
+                  </video>
+                  <h4 class="subtitle has-text-centered">
+                    A coca cola vending machine
+                    </h4>
+                </div>
+              </div>   
+
+              <div class="column">
+                <div class="content">
+                  <video id="dollyzoom" autoplay controls muted loop playsinline height="100%">
+                    <source src="./samples/videos/telephone.mp4"
+                            type="video/mp4">
+                  </video>
+                <h4 class="subtitle has-text-centered">
+                  A telephone with golden dials
+                </h4>
+                </div>
+            </div>
+
+          </div>
+
+          <div class="columns is-centered">
+            <div class="column">
+              <div class="content">
+                <video id="dollyzoom" autoplay controls muted loop playsinline height="100%">
+                  <source src="./samples/videos/stone.mp4"
+                          type="video/mp4">
+                </video>
+                <h4 class="subtitle has-text-centered">
+                  A stone lantern
+                </h4>
+              </div>
+            </div>
+
+            <div class="column">
+              <div class="content">
+                <video id="dollyzoom" autoplay controls muted loop playsinline height="100%">
+                  <source src="./samples/videos/helmet.mp4"
+                          type="video/mp4">
+                </video>
+                <h4 class="subtitle has-text-centered">
+                  A Mandalorian helmet in silver
+                  </h4>
+              </div>
+            </div>
+
+            <div class="column">
+              <div class="content">
+                <video id="dollyzoom" autoplay controls muted loop playsinline height="100%">
+                  <source src="./samples/videos/pottery.mp4"
+                          type="video/mp4">
+                </video>
+              <h4 class="subtitle has-text-centered">
+                A pottery with flowers
+              </h4>
+              </div>
+            </div>
+          </div>
+          
+          
+          
+          <div class="columns is-centered">
+            <div class="column">
+                <div class="content">
+                  <video id="dollyzoom" autoplay controls muted loop playsinline height="100%">
+                    <source src="./samples/videos/turtle.mp4"
+                            type="video/mp4">
+                  </video>
+                  <h4 class="subtitle has-text-centered">
+                    A metal turtle with red eyes
+                    </h4>
+                </div>
+            </div>
+            <div class="column">
+              <div class="content">
+                <video id="dollyzoom" autoplay controls muted loop playsinline height="100%">
+                  <source src="./samples/videos/lion.mp4"
+                          type="video/mp4">
+                </video>
+                <h4 class="subtitle has-text-centered">
+                  A lion looking forward
+                  </h4>
+              </div>
+            </div>
+
+            <div class="column">
+              <div class="content">
+                <video id="dollyzoom" autoplay controls muted loop playsinline height="100%">
+                  <source src="./samples/videos/sherlock.mp4"
+                          type="video/mp4">
+                </video>
+                <h4 class="subtitle has-text-centered">
+                  A high quality color photograph of Benedict Cumberbatch
+                  </h4>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="columns is-centered">
+
+            <div class="column">
+              <div class="content">
+                <video id="dollyzoom" autoplay controls muted loop playsinline height="100%">
+                  <source src="./samples/videos/shark.mp4"
+                          type="video/mp4">
+                </video>
+                <h4 class="subtitle has-text-centered">
+                  A dark blue shark
+                </h4>
+              </div>
+            </div>
+
+            <div class="column">
+              <div class="content">
+                <video id="dollyzoom" autoplay controls muted loop playsinline height="100%">
+                  <source src="./samples/videos/donut.mp4"
+                          type="video/mp4">
+                </video>
+                <h4 class="subtitle has-text-centered">
+                  A chocolate doughnut
+                  </h4>
+              </div>
+            </div>   
+
+            <div class="column">
+              <div class="content">
+                <video id="dollyzoom" autoplay controls muted loop playsinline height="100%">
+                  <source src="./samples/videos/ironman_tv.mp4"
+                          type="video/mp4">
+                </video>
+                <h4 class="subtitle has-text-centered">
+                  An ironman monitor
+                  </h4>
+              </div>
+            </div> 
+
+            
+          </div>
+          
+          
+          <!-- --- -->
+          <div class="columns is-centered">
+      
+
+            <div class="column">
+                <div class="content">
+                  <video id="dollyzoom" autoplay controls muted loop playsinline height="100%">
+                    <source src="./samples/videos/ps5.mp4"
+                            type="video/mp4">
+                  </video>
+                  <h4 class="subtitle has-text-centered">
+                    A ps5 controller with black buttons on the top
+                    </h4>
+                </div>
+              </div>
+      
+            <div class="column">
+              <div class="content">
+                <video id="dollyzoom" autoplay controls muted loop playsinline height="100%">
+                  <source src="./samples/videos/firehy.mp4"
+                          type="video/mp4">
+                </video>
+                <h4 class="subtitle has-text-centered">
+                  A fireplug, red and yellow
+                  </h4>
+              </div>
+            </div>
+
+            <div class="column">
+                <div class="content">
+                  <video id="dollyzoom" autoplay controls muted loop playsinline height="100%">
+                    <source src="./samples/videos/owl.mp4"
+                            type="video/mp4">
+                  </video>
+                  <h4 class="subtitle has-text-centered">
+                    A metal owl with glowing eyes
+                    </h4>
+                </div>
+            </div>
+      
+          </div>
+
+
+
+        <div class="columns is-centered">
+      
+            <!-- Visual Effects. -->
+
+            <div class="column">
+                <div class="content">
+                  <video id="dollyzoom" autoplay controls muted loop playsinline height="100%">
+                    <source src="./samples/videos/keg.mp4"
+                            type="video/mp4">
+                  </video>
+                <h4 class="subtitle has-text-centered">
+                  A metal keg surrounded in silver
+                </h4>
+                </div>
+            </div>
+
+ 
+            <div class="column">
+              <div class="content">
+                <video id="dollyzoom" autoplay controls muted loop playsinline height="100%">
+                  <source src="./samples/videos/wooden_crate.mp4"
+                          type="video/mp4">
+                </video>
+                <h4 class="subtitle has-text-centered">
+                  A wooden crate
+                  </h4>
+              </div>
+            </div>   
+
+            <div class="column">
+              <div class="content">
+                <video id="dollyzoom" autoplay controls muted loop playsinline height="100%">
+                  <source src="./samples/videos/tom.mp4"
+                          type="video/mp4">
+                </video>
+                <h4 class="subtitle has-text-centered">
+                  A high quality color photograph of Tom Cruise
+                  </h4>
+              </div>
+            </div>   
+          </div>
+
+          <div class="columns is-centered">
+            <div class="column">
+              <div class="content">
+                <video id="dollyzoom" autoplay controls muted loop playsinline height="100%">
+                  <source src="./samples/videos/wooden_dresser.mp4"
+                          type="video/mp4">
+                </video>
+                <h4 class="subtitle has-text-centered">
+                  A wooden dresser
+                  </h4>
+              </div>
+            </div>
+
+            <div class="column">
+              <div class="content">
+                <video id="dollyzoom" autoplay controls muted loop playsinline height="100%">
+                  <source src="./samples/videos/cute_lion.mp4"
+                          type="video/mp4">
+                </video>
+              <h4 class="subtitle has-text-centered">
+                A cute 3D cartoon lion with brown hair
+              </h4>
+              </div>
+            </div>
+
+            <div class="column">
+              <div class="content">
+                <video id="dollyzoom" autoplay controls muted loop playsinline height="100%">
+                  <source src="./samples/videos/wolf.mp4"
+                          type="video/mp4">
+                </video>
+              <h4 class="subtitle has-text-centered">
+                Statue of a wolf
+              </h4>
+              </div>
+            </div>
+          </div>
+
+
+
+
+    </section>
+
+
+    <!-- <section class="hero is-light is-small">
+        <div class="hero-body">
+            <div class="container">
+                <h2 class="title is-3">Textured Objects</h2>
+                
+                <div id="results-carousel" class="carousel results-carousel">
+                    <div>
+			            <div style="text-align: center; font-size: large;">Original </div>
+                    </div>
+                    <div>
+			            <div style="text-align: center; font-size: large;">CLIPMesh </div>
+                    </div>
+                    <div>
+			            <div style="text-align: center; font-size: large;">Latent-Paint </div>
+                    </div>
+                    <div>
+			            <div style="text-align: center; font-size: large;">TEXTexture </div>
+                    </div>
+                    <div>
+			            <div style="text-align: center; font-size: large;">Ours </div>
+                    </div>
+                </div>
+                <div id="results-carousel" class="carousel results-carousel">
+                    <div class="item item-steve render_wrapper">
+			            <div id="shoesbamboo_original" class="render_div"></div>
+                    </div>
+                    <div class="item item-steve render_wrapper">
+			            <div id="shoesbamboo_clipmesh" class="render_div"></div>
+                    </div>
+                    <div class="item item-steve render_wrapper">
+			            <div id="shoesbamboo_latentpaint" class="render_div"></div>
+                    </div>
+                    <div class="item item-steve render_wrapper">
+			            <div id="shoesbamboo_texture" class="render_div"></div>
+                    </div>
+                    <div class="item item-steve render_wrapper">
+			            <div id="shoesbamboo_ours" class="render_div"></div>
+                    </div>
+                </div>
+
+                <div style="text-align: center; font-size: large; height: 50px;">"Sneaker, put on a bamboo box" </div>
+
+                <div id="results-carousel" class="carousel results-carousel">
+                    <div>
+			            <div style="text-align: center; font-size: large;">Original </div>
+                    </div>
+                    <div>
+			            <div style="text-align: center; font-size: large;">CLIPMesh </div>
+                    </div>
+                    <div>
+			            <div style="text-align: center; font-size: large;">Latent-Paint </div>
+                    </div>
+                    <div>
+			            <div style="text-align: center; font-size: large;">TEXTexture </div>
+                    </div>
+                    <div>
+			            <div style="text-align: center; font-size: large;">Ours </div>
+                    </div>
+                </div>
+                <div id="results-carousel" class="carousel results-carousel">
+                    <div class="item item-steve render_wrapper">
+			            <div id="Fairyhouse_original" class="render_div"></div>
+                    </div>
+                    <div class="item item-steve render_wrapper">
+			            <div id="Fairyhouse_clipmesh" class="render_div"></div>
+                    </div>
+                    <div class="item item-steve render_wrapper">
+			            <div id="Fairyhouse_latentpaint" class="render_div"></div>
+                    </div>
+                    <div class="item item-steve render_wrapper">
+			            <div id="Fairyhouse_texture" class="render_div"></div>
+                    </div>
+                    <div class="item item-steve render_wrapper">
+			            <div id="Fairyhouse_ours" class="render_div"></div>
+                    </div>
+                </div>
+
+                <div style="text-align: center; font-size: large; height: 50px;">"Fairy house with a garden" </div>
+
+                 <div id="results-carousel" class="carousel results-carousel">
+                    <div>
+			            <div style="text-align: center; font-size: large;">Original </div>
+                    </div>
+                    <div>
+			            <div style="text-align: center; font-size: large;">CLIPMesh </div>
+                    </div>
+                    <div>
+			            <div style="text-align: center; font-size: large;">Latent-Paint </div>
+                    </div>
+                    <div>
+			            <div style="text-align: center; font-size: large;">TEXTexture </div>
+                    </div>
+                    <div>
+			            <div style="text-align: center; font-size: large;">Ours </div>
+                    </div>
+                </div>
+                <div id="results-carousel" class="carousel results-carousel">
+                    <div class="item item-steve render_wrapper">
+			            <div id="knightarmor_original" class="render_div"></div>
+                    </div>
+                    <div class="item item-steve render_wrapper">
+			            <div id="knightarmor_clipmesh" class="render_div"></div>
+                    </div>
+                    <div class="item item-steve render_wrapper">
+			            <div id="knightarmor_latentpaint" class="render_div"></div>
+                    </div>
+                    <div class="item item-steve render_wrapper">
+			            <div id="knightarmor_texture" class="render_div"></div>
+                    </div>
+                    <div class="item item-steve render_wrapper">
+			            <div id="knightarmor_ours" class="render_div"></div>
+                    </div>
+                </div>
+
+                <div style="text-align: center; font-size: large; height: 50px;">"A man wears a set of medieval knight armor" </div> -->
+
+            <!-- </div>
+        </div>
+    </section> -->
+
+    <!-- <section class="hero is-light is-small">
+        <div class="hero-body">
+            <div class="container">
+                <h2 class="title is-3">Creative Texture Synthesis</h2>
+                
+                <div id="results-carousel" class="carousel results-carousel">
+                    <div>
+			            <div style="text-align: center; font-size: large;">"baroque Porsche" </div>
+                    </div>
+                    <div>
+			            <div style="text-align: center; font-size: large;">"wooden Porsche" </div>
+                    </div>
+                    <div>
+			            <div style="text-align: center; font-size: large;">"cyberpunk Porsche" </div>
+                    </div>
+                    <div>
+			            <div style="text-align: center; font-size: large;">"Lego Porsche" </div>
+                    </div>
+                </div>
+                <div id="results-carousel" class="carousel results-carousel">
+                    <div class="item item-steve render_wrapper">
+			            <div id="baroque_porsche" class="render_div"></div>
+                    </div>
+                    <div class="item item-steve render_wrapper">
+			            <div id="wooden_porsche" class="render_div"></div>
+                    </div>
+                    <div class="item item-steve render_wrapper">
+			            <div id="cyberpunk_porsche" class="render_div"></div>
+                    </div>
+                    <div class="item item-steve render_wrapper">
+			            <div id="lego_porsche" class="render_div"></div>
+                    </div>
+                </div>
+
+                <div style="text-align: center; font-size: large; height: 50px;">Porsche in different styles </div>
+
+                <div id="results-carousel" class="carousel results-carousel">
+                    <div>
+			            <div style="text-align: center; font-size: large;">"airplane </div>
+                    </div>
+                    <div>
+			            <div style="text-align: center; font-size: large;">"crocodile" </div>
+                    </div>
+                    <div>
+			            <div style="text-align: center; font-size: large;">"hippo" </div>
+                    </div>
+                    <div>
+			            <div style="text-align: center; font-size: large;">"sheep" </div>
+                    </div>
+                </div>
+                <div id="results-carousel" class="carousel results-carousel">
+                    <div class="item item-steve render_wrapper">
+			            <div id="airplane_porsche" class="render_div"></div>
+                    </div>
+                    <div class="item item-steve render_wrapper">
+			            <div id="crocodile_porsche" class="render_div"></div>
+                    </div>
+                    <div class="item item-steve render_wrapper">
+			            <div id="hippo_porsche" class="render_div"></div>
+                    </div>
+                    <div class="item item-steve render_wrapper">
+			            <div id="sheep_porsche" class="render_div"></div>
+                    </div>
+                </div>
+
+                <div style="text-align: center; font-size: large; height: 50px;">Porsche as other objects </div>
+                
+            </div>
+        </div>
+    </section> -->
+
+    <!-- <section class="section" id="BibTeX">
+        <div class="container is-max-desktop content">
+            <h2 class="title">Citation</h2>
+            <pre>
+<code>
+@inproceedings{guo2023decorate3d,
+    title={Decorate3D: Text-Driven High-Quality Texture Generation for Mesh Decoration in the Wild},
+    author={Guo, Yanhui and Zuo, Xinxin and Dai, Peng and Lu, Juwei and Wu, Xiaolin and Cheng, Li and Yan, Youliang and Xu, Songcen and Wu, Xiaofei},
+    booktitle={Thirty-seventh Conference on Neural Information Processing Systems (NeurIPS)},
+    year={2023},
+}
+</code></pre>
+        </div>
+    </section> -->
+
+
+    <!-- <footer class="footer">
+        <div class="container">
+            <div class="content has-text-centered">
+                <a class="icon-link" href="static/Decorate3D.pdf">
+                    <i class="fas fa-file-pdf"></i>
+                </a>
+                <a class="icon-link" href="https://github.com/daveredrum" class="external-link" disabled>
+                    <i class="fab fa-github"></i>
+                </a>
+            </div>
+            <div class="columns is-centered">
+                <div class="column is-8">
+                    <div class="content">
+                        <p style="text-align:center">
+                            Source code mainly borrowed from <a href="https://niessnerlab.org/members/yawar_siddiqui/profile.html">Yawar Siddiqui</a>'s <a
+                                href="https://nihalsid.github.io/texturify/">Texturify website</a>.
+                        </p>
+                        <p style="text-align:center">
+                            Please contact Yanhui Guo for feedback and questions.
+                        </p>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer> -->
+
+    <!-- Import maps polyfill -->
+    <!-- Remove this when import maps will be widely supported -->
+    <script async src="https://unpkg.com/es-module-shims@1.3.6/dist/es-module-shims.js"></script>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "./js/three.module.js"
+            }
+        }
+    </script>
+
+    <script type="module">
+
+        import * as THREE from 'three';
+
+        import { PLYLoader } from './js/PLYLoader.js';
+        import { OBJLoader } from './js/OBJLoader.js';
+        import { MTLLoader } from './js/MTLLoader.js';
+        import { OrbitControls } from './js/OrbitControls.js'
+        let div_to_scene = {
+            "shoesbamboo": {},
+            "Fairyhouse": {},
+            // "knightarmor":{},
+            
+        };
+        let div_camera = {
+            "shoesbamboo": null,
+            "Fairyhouse": null,
+            // "knightarmor":null,
+        };
+        
+        let mouse_button_down = false;
+        let list_of_orbit_controls = []
+        let style_camera = null;
+        let render_colors = true;
+        let style_id = "0"
+
+        function setup_camera(div_name){
+            let container = document.getElementById(div_name);
+            let width = container.parentElement.clientWidth;
+            let height = container.parentElement.clientHeight;
+            console.log(width, height)
+            let camera = new THREE.PerspectiveCamera( 35, width / height, 0.1, 50 );
+            let camera_init_position = new THREE.Vector3( -1, 0.5, 4 );
+            if (div_name.includes("shoesbamboo")){
+                camera_init_position = new THREE.Vector3( -1, 0.5, 2.5 );
+            }
+            if (div_name.includes("knightarmor")){
+                camera_init_position = new THREE.Vector3( -1, 0.5, 0.5);
+            }
+            // else if (div_name.includes("backpack")) {
+            //     camera_init_position = new THREE.Vector3( -1.5, 0.5, 1.5 );
+            // }
+            camera.position.set(camera_init_position.x, camera_init_position.y, camera_init_position.z);
+
+            return camera;
+        }
+
+        function setup_render_divs(div_name, obj_name, obj_path, mtl_path, texture_path){
+            if (div_camera[obj_name] == null) {
+                div_camera[obj_name] = setup_camera(div_name)
+            }
+            
+            let orbit_control = create_render_div(div_camera[obj_name], div_name, obj_name, obj_path, mtl_path, texture_path)
+            list_of_orbit_controls.push(orbit_control)
+        }
+
+        function create_render_div(camera, div_id, obj_name, obj_path, mtl_path, texture_path) {
+            let container;
+            let renderer, controls;
+
+            init();
+            animate();
+
+            function init() {
+
+                container = document.getElementById(div_id);
+                let width = container.parentElement.clientWidth;
+                let height = container.parentElement.clientHeight;
+
+
+                div_to_scene[obj_name][div_id] = new THREE.Scene();
+                div_to_scene[obj_name][div_id].background = new THREE.Color( 0xffffff );
+
+                // ObJ file
+
+                const objLoader  = new OBJLoader();
+                const textureLoader = new THREE.TextureLoader();
+                const mtlLoader = new MTLLoader();
+
+                mtlLoader.load(mtl_path, function ( materials ) {
+                    materials.preload();
+                    objLoader
+                        .setMaterials( materials )
+                        .load( obj_path, function ( object ) {
+                            textureLoader
+                                .load( texture_path, function ( texture ) {
+                                    object.traverse (function ( child ) {
+                                        if ( child instanceof THREE.Mesh ) {
+                                            child.material.map = texture;
+                                        }
+                                    });
+
+                                    div_to_scene[obj_name][div_id].add( object );
+                                });
+                        });
+                });
+
+                div_to_scene[obj_name][div_id].add( new THREE.HemisphereLight( 0x333333, 0x222222 ) );
+                addShadowedLight(div_to_scene[obj_name][div_id], 1, 1, 1, 0xffffff, 1 );
+                addShadowedLight(div_to_scene[obj_name][div_id],  -1, -1, - 1, 0xffffff, 0.5 );
+
+                // renderer
+
+                renderer = new THREE.WebGLRenderer( { antialias: true } );
+                renderer.setPixelRatio( window.devicePixelRatio );
+                renderer.setSize( width, height);
+                renderer.outputEncoding = THREE.sRGBEncoding;
+
+                renderer.shadowMap.enabled = true;
+
+                container.appendChild( renderer.domElement );
+
+                controls = new OrbitControls(camera, renderer.domElement)
+                controls.enableDamping = false
+
+                // resize
+
+                window.addEventListener( 'resize', onWindowResize );
+
+        }
+            function onWindowResize() {
+                let width = container.clientWidth;
+                let height = container.clientHeight;
+                camera.aspect = width / height;
+                camera.updateProjectionMatrix();
+                renderer.setSize( width, height );
+            }
+            function animate() {
+                requestAnimationFrame( animate );
+                render();
+            }
+
+            function render() {
+                renderer.render( div_to_scene[obj_name][div_id], camera );
+                controls.update();
+            }
+
+            return controls;
+        }
+
+        function addShadowedLight(scene, x, y, z, color, intensity ) {
+
+            const directionalLight = new THREE.DirectionalLight( color, intensity );
+            directionalLight.position.set( x, y, z );
+            scene.add( directionalLight );
+
+            directionalLight.castShadow = true;
+
+            const d = 1;
+            directionalLight.shadow.camera.left = - d;
+            directionalLight.shadow.camera.right = d;
+            directionalLight.shadow.camera.top = d;
+            directionalLight.shadow.camera.bottom = - d;
+
+            directionalLight.shadow.camera.near = 1;
+            directionalLight.shadow.camera.far = 4;
+
+            directionalLight.shadow.mapSize.width = 1024;
+            directionalLight.shadow.mapSize.height = 1024;
+
+            directionalLight.shadow.bias = - 0.001;
+
+        }
+
+        document.addEventListener('keydown', logKey);
+
+        function logKey(evt) {
+            if (evt.keyCode === 82 && !mouse_button_down) {
+                reset_orbit_controls()
+            }
+        }
+
+        function reset_orbit_controls() {
+            list_of_orbit_controls.forEach(oc => {
+                oc.reset()
+            })
+        }
+
+        document.body.onmousedown = function(evt) {
+            if (evt.button === 0)
+                mouse_button_down = true
+        }
+        document.body.onmouseup = function(evt) {
+            if (evt.button === 0)
+                mouse_button_down = false
+        }
+
+        window.onload = function() {
+            let slider = document.getElementsByClassName("slider")[0]
+            slider.removeAttribute("tabIndex")
+            // slider.addEventListener("mouseout", reset_orbit_controls);
+
+            // const qualitative = ["compass", "ambulance", "backpack", "dumpster"];
+            const qualitative = ["shoesbamboo","Fairyhouse"];
+
+            qualitative.forEach(element => {
+                setup_render_divs(element+"_original", element,
+                './samples/qualitative/'+element+'/original/mesh.obj', 
+                './samples/qualitative/'+element+'/original/mesh.mtl', 
+                './samples/qualitative/'+element+'/original/texture.png'
+                );
+                setup_render_divs(element+"_clipmesh", element,
+                    './samples/qualitative/'+element+'/clipmesh/mesh.obj', 
+                    './samples/qualitative/'+element+'/clipmesh/mesh.mtl', 
+                    './samples/qualitative/'+element+'/clipmesh/texture.png'
+                );
+                setup_render_divs(element+"_latentpaint", element,
+                    './samples/qualitative/'+element+'/latentpaint/mesh.obj', 
+                    './samples/qualitative/'+element+'/latentpaint/mesh.mtl', 
+                    './samples/qualitative/'+element+'/latentpaint/texture.png'
+                );
+                setup_render_divs(element+"_texture", element,
+                    './samples/qualitative/'+element+'/texture/mesh.obj', 
+                    './samples/qualitative/'+element+'/texture/mesh.mtl', 
+                    './samples/qualitative/'+element+'/texture/texture.png'
+                );
+                setup_render_divs(element+"_ours", element,
+                    './samples/qualitative/'+element+'/ours/mesh.obj', 
+                    './samples/qualitative/'+element+'/ours/mesh.mtl', 
+                    './samples/qualitative/'+element+'/ours/texture.png'
+                );
+            });
+            
+        };
+
+    </script>
+</body>
+
+</html>
